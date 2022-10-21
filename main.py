@@ -9,11 +9,15 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDesktopWidget, QMessageBox
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 
 import my_ui.SeckillUi
 from settime import SetTime
 import qrainbowstyle
 
+service = Service('./chromedriver')
+
+service.start()
 
 
 class MainDialog(QMainWindow):
@@ -29,7 +33,8 @@ class MainDialog(QMainWindow):
         self.screen = QDesktopWidget().screenGeometry()
         size = self.geometry()
         self.move((self.screen.width() - size.width() - 80), (self.screen.height() - size.height()) / 2)
-        self.browser = webdriver.Chrome()
+
+        self.browser = webdriver.Remote(service.service_url)
         self.browser.set_window_size(self.screen.width() / 2, self.screen.height())
         print(sys.path[0])
         self.manual = "file:///" + sys.path[0] + "/manual/index.html"
@@ -65,7 +70,7 @@ class MainDialog(QMainWindow):
         try:
             self.browser.get("https://www.taobao.com/")
         except:
-            self.browser = webdriver.Chrome()
+            self.browser = webdriver.Remote(service.service_url)
             self.browser.set_window_size(self.screen.width() / 2, self.screen.height())
             self.ui.textBrowser.append("请勿关闭浏览器！抢单失败！")
             return -1
@@ -129,25 +134,27 @@ class MainDialog(QMainWindow):
         try:
             self.browser.get("https://www.jd.com/")
         except:
-            self.browser = webdriver.Chrome()
+            self.browser =webdriver.Remote(service.service_url)
             self.browser.set_window_size(self.screen.width() / 2, self.screen.height())
             self.ui.textBrowser.append("请勿关闭浏览器！抢单失败！")
             return -1
-        try:
-            loc = (By.LINK_TEXT, "你好，请登录")
-            WebDriverWait(self.browser, 30, 0.5).until(EC.visibility_of_element_located(loc))
-            self.browser.find_element(By.LINK_TEXT, "你好，请登录").click()
-        except:
-            self.ui.textBrowser.append("登录失败！")
-            return -1
-        try:
-            loc = (By.XPATH, "//*[@id=\"content\"]/div[2]/div[1]/div/div[2]/a")
-            self.ui.textBrowser.append("请使用手机京东客户端扫码登录")
-            self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
-            WebDriverWait(self.browser, 30, 0.5).until_not(EC.visibility_of_element_located(loc))
-        except:
-            self.ui.textBrowser.append("等待扫码时间过长，登陆失败！")
-            return -1
+        if self.browser.find_element(By.CLASS_NAME, 'nickname') is None:
+            try:
+                loc = (By.LINK_TEXT, "你好，请登录")
+                WebDriverWait(self.browser, 30, 0.5).until(EC.visibility_of_element_located(loc))
+
+                self.browser.find_element(By.LINK_TEXT, "你好，请登录").click()
+            except:
+                self.ui.textBrowser.append("登录失败！")
+                return -1
+            try:
+                loc = (By.XPATH, "//*[@id=\"content\"]/div[2]/div[1]/div/div[2]/a")
+                self.ui.textBrowser.append("请使用手机京东客户端扫码登录")
+                self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
+                WebDriverWait(self.browser, 30, 0.5).until_not(EC.visibility_of_element_located(loc))
+            except:
+                self.ui.textBrowser.append("等待扫码时间过长，登陆失败！")
+                return -1
         try:
             self.browser.get(goods_url)
             self.ui.textBrowser.append("进入商品页面")
@@ -175,7 +182,9 @@ class MainDialog(QMainWindow):
         try:
             loc = (By.CSS_SELECTOR, '.common-submit-btn > b')
             WebDriverWait(self.browser, 30, 0.01).until(EC.visibility_of_element_located(loc))
-            self.browser.find_element(By.CSS_SELECTOR, '.common-submit-btn > b').click()
+            element = self.browser.find_element(By.CLASS_NAME, 'btn-area').find_element(By.CLASS_NAME,
+                                                                                        'common-submit-btn')
+            self.browser.execute_script("arguments[0].click();", element)
             loc = (By.CSS_SELECTOR, '#order-submit > b')
         except:
             self.ui.textBrowser.append("提交订单失败")
@@ -228,7 +237,7 @@ class MainDialog(QMainWindow):
         try:
             self.browser.get(self.manual)
         except:
-            self.browser = webdriver.Chrome()
+            self.browser = webdriver.Remote(service.service_url)
             self.browser.get(self.manual)
         self.ui.textBrowser.setText("抢单已终止！\n请重新选择抢单...")
         self.stop_thread.set()
@@ -246,7 +255,7 @@ class MainDialog(QMainWindow):
             try:
                 self.browser.get(self.manual)
             except:
-                self.browser = webdriver.Chrome()
+                self.browser = webdriver.Remote(service.service_url)
                 self.browser.set_window_size(self.screen.width() / 2, self.screen.height())
                 self.browser.get(self.manual)
 
@@ -257,7 +266,7 @@ class MainDialog(QMainWindow):
             try:
                 self.browser.get(self.about)
             except:
-                self.browser = webdriver.Chrome()
+                self.browser = webdriver.Remote(service.service_url)
                 self.browser.set_window_size(self.screen.width() / 2, self.screen.height())
                 self.browser.get(self.about)
 
