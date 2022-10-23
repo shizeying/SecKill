@@ -15,7 +15,7 @@ import my_ui.SeckillUi
 from settime import SetTime
 import qrainbowstyle
 
-service = Service('./chromedriver')
+service = Service('./chromedriver.exe')
 
 service.start()
 
@@ -75,24 +75,24 @@ class MainDialog(QMainWindow):
             self.ui.textBrowser.append("请勿关闭浏览器！抢单失败！")
             return -1
         goods_url = self.ui.lineEdit.text()
-        try:
-            loc = (By.LINK_TEXT, "亲，请登录")
-            WebDriverWait(self.browser, 30, 0.5).until(EC.visibility_of_element_located(loc))
-            self.browser.find_element(By.LINK_TEXT, "亲，请登录").click()
-        except:
-            self.ui.textBrowser.append("登录失败！")
-            return -1
-
-        try:
-            loc = (By.XPATH, "//*[@id='login']/div[1]/i")
-            WebDriverWait(self.browser, 30, 0.5).until(EC.visibility_of_element_located(loc))
-            self.browser.find_element(By.XPATH, "//*[@id='login']/div[1]/i").click()  # 淘宝切换二维码登录按钮
-            self.ui.textBrowser.append("请使用手机淘宝扫码登录")
-            self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
-            WebDriverWait(self.browser, 30, 0.5).until_not(EC.visibility_of_element_located(loc))
-        except:
-            self.ui.textBrowser.append("等待扫码时间过长，登陆失败！")
-            return -1
+        # try:
+        #     loc = (By.LINK_TEXT, "亲，请登录")
+        #     WebDriverWait(self.browser, 30, 0.5).until(EC.visibility_of_element_located(loc))
+        #     self.browser.find_element(By.LINK_TEXT, "亲，请登录").click()
+        # except:
+        #     self.ui.textBrowser.append("登录失败！")
+        #     return -1
+        #
+        # try:
+        #     loc = (By.XPATH, "//*[@id='login']/div[1]/i")
+        #     WebDriverWait(self.browser, 30, 0.5).until(EC.visibility_of_element_located(loc))
+        #     self.browser.find_element(By.XPATH, "//*[@id='login']/div[1]/i").click()  # 淘宝切换二维码登录按钮
+        #     self.ui.textBrowser.append("请使用手机淘宝扫码登录")
+        #     self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
+        #     WebDriverWait(self.browser, 30, 0.5).until_not(EC.visibility_of_element_located(loc))
+        # except:
+        #     self.ui.textBrowser.append("等待扫码时间过长，登陆失败！")
+        #     return -1
 
         try:
             self.browser.get(goods_url)
